@@ -1,0 +1,34 @@
+name: Validate achievement keyboard fix
+on:
+  push:
+    branches: [validate/1099-achievement-keyboard]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: validation-placeholder
+      NEXT_PUBLIC_KYC_API_BASE_URL: http://localhost:3001
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXTAUTH_SECRET: validation-placeholder-not-a-real-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.3.14
+      - name: Install without lifecycle scripts
+        run: bun install --frozen-lockfile --ignore-scripts
+      - name: Focused regression tests
+        working-directory: apps/web
+        run: bun test test/achievement-card.test.tsx
+      - name: Check changed files
+        run: bunx biome check apps/web/components/sections/achievements/achievement-card.tsx apps/web/test/achievement-card.test.tsx
+      - name: Generate Next types
+        working-directory: apps/web
+        run: bunx next typegen
+      - name: TypeScript
+        working-directory: apps/web
+        run: bunx tsc --noEmit --incremental false
