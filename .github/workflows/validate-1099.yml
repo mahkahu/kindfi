@@ -26,9 +26,18 @@ jobs:
         run: bun test test/achievement-card.test.tsx
       - name: Check changed files
         run: bunx biome check apps/web/components/sections/achievements/achievement-card.tsx apps/web/test/achievement-card.test.tsx
+      - name: Browser tools
+        run: |
+          npm install --prefix /tmp/browser-tools --ignore-scripts --no-package-lock playwright@1.56.1
+          /tmp/browser-tools/node_modules/.bin/playwright install --with-deps chromium
+      - name: Browser regression
+        working-directory: apps/web
+        run: bun scripts/validation/achievement-browser.ts
       - name: Generate Next types
+        if: always()
         working-directory: apps/web
         run: bunx next typegen
       - name: TypeScript
+        if: always()
         working-directory: apps/web
         run: bunx tsc --noEmit --incremental false
