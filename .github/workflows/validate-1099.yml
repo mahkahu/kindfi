@@ -41,8 +41,21 @@ jobs:
         if: always()
         working-directory: apps/web
         run: bunx tsc --noEmit --incremental false
+      - name: Full web test suite
+        if: always()
+        working-directory: apps/web
+        run: timeout 180s bun test
+      - name: Repository lint
+        if: always()
+        run: bun run lint
   baseline-types:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: validation-placeholder
+      NEXT_PUBLIC_KYC_API_BASE_URL: http://localhost:3001
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXTAUTH_SECRET: validation-placeholder-not-a-real-secret
     steps:
       - uses: actions/checkout@v4
         with:
